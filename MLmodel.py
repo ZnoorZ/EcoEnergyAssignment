@@ -60,6 +60,6 @@ r_errors = test_set_y - y_hat
 #plotting residual errors for both training and testing data
 plt.scatter(lm.predict(train_set_x), lm.predict(train_set_x)-train_set_y, c='b', s=40, alpha=0.5)
 plt.scatter(y_hat, r_errors, c='g', s=40, alpha=0.5) 
-plt.hlines(y=0, xmin=0, xmax=50)
+plt.hlines(y=0, xmin=-0.2, xmax=0.8)
 plt.title('Residual Plot using training(blue) and test (green) data')
 plt.ylabel('Residuals')

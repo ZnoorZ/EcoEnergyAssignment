@@ -1,44 +1,8 @@
 #MPI values are real numbers so I am simply using linear regression 
+from sklearn import linear_model
 import numpy as np
 import pandas as pd
-
-#procedures
-
-def feature_Normalize(x):
-    x_norm = x
-    mu = np.zeros(len(x.columns)-1)
-    sigma = np.zeros(len(x.columns)-1)
-    mu = x_norm.loc[:, x_norm.columns != 'Continent'].mean(axis=0)
-    sigma = x_norm.loc[:, x_norm.columns != 'Continent'].std(axis=0)    
-    x_norm.loc[:, x_norm.columns != 'Continent']= (x_norm.loc[:, x_norm.columns != 'Continent']-mu)/sigma
-    return x_norm, mu, sigma
-
-
-def compute_cost(X, y, theta):
-    J = 0
-    m = len(y)
-    J = np.sum(np.square(np.subtract(np.dot(X,theta),y)))/(2*m)
-    return J
-
-def gradient_descent(X, y, theta2, alpha, iterations):
-    m = len(y)
-    J_history = np.zeros(iterations)
-    temp = theta2
-    for i in range(1,iterations): 
-        s=pd.DataFrame(np.zeros(5))
-        for j in range(0, 4):
-            x_column= X.iloc[:,j]
-            s.iloc[j] = np.sum((np.subtract(np.dot(X,theta2),y)).mul(x_column, axis=0))
-        temp = theta2 - alpha*s/m        
-        theta2=temp            
-        J_history[i] = compute_cost(X, y, theta2) 
-    return theta2, J_history
-
-
-
-def num_missing(x):
-  return sum(x==0)
-
+import matplotlib.pyplot as plt
 
 #fetching data
 filename = "processed_data.csv"
@@ -55,9 +19,8 @@ model_data.columns = ['Continent', 'Population', 'IoD_Rural', 'IoD_Urban', 'MPI'
 model_data['Continent'].unique()
 num_labels = {"Continent":{'Asia':1, 'Africa':2, 'Americas':3}}
 model_data.replace(num_labels, inplace=True)
-
-model_data['Population'] = pd.to_numeric(model_data['Population'], errors='coerce')
-
+#print(model_data['Population'])
+model_data.info()
 
 #there are 984 entries in total
 #600 datapoints for training data
@@ -70,29 +33,33 @@ test_set_x = model_data.loc[600:983,['Continent', 'Population', 'IoD_Rural', 'Io
 
 test_set_y = model_data.loc[600:983,['MPI']] 
         
+#converting dataframes to matrices
+
+train_set_x = train_set_x.as_matrix().astype(np.float)
+train_set_y = train_set_y.as_matrix().astype(np.float)
+test_set_x = test_set_x.as_matrix().astype(np.float)
+test_set_y = test_set_y.as_matrix().astype(np.float)
+
+#print(test_set_x)
 
 # main flow of training
-m = len(train_set_x.columns)
+lm = linear_model.LinearRegression()
+lm.fit(train_set_x, train_set_y) 
+print(lm.coef_) 
 
-#normalizing features
+#predicting MPI
+y_hat = lm.predict(test_set_x)
+plt.scatter(test_set_y, y_hat)
+plt.title("MPIs vs Predicted MPIs")
+plt.xlabel('Original MPIs')
+plt.ylabel('Predicted MPIs')
 
-X, mu, sigma = feature_Normalize(train_set_x)
+#calculating residual errors
+r_errors = test_set_y - y_hat
 
-#adding intercept term
-X['intercept']=1
-
-# choosing alpha values and number of iterations
-alpha = 0.01
-num_iterations = 100
-
-#initialising theta for gradient descent
-theta = pd.DataFrame(np.zeros(m+1))
-
-compute_cost(X, train_set_y, theta)
-
-theta2 = pd.DataFrame(np.zeros(m+1))
-
-theta2, J_history = gradient_descent(X, train_set_y, theta2, alpha, num_iterations)
-
-#badly got stuck in dot product with pandas in gradient descent procedure, 
-#can't move ahead with this code
+#plotting residual errors for both training and testing data
+plt.scatter(lm.predict(train_set_x), lm.predict(train_set_x)-train_set_y, c='b', s=40, alpha=0.5)
+plt.scatter(y_hat, r_errors, c='g', s=40, alpha=0.5) 
+plt.hlines(y=0, xmin=0, xmax=50)
+plt.title('Residual Plot using training(blue) and test (green) data')
+plt.ylabel('Residuals')

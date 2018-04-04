@@ -17,7 +17,7 @@ def find_correlation(x):
     
 def find_disparities(x, a, b):
     sd = x.groupby(a).agg(numpy.std, ddof=1)
-    print(sd.sort_values(b, ascending=False))
+    print(sd.sort_values(b, ascending=False).head(10))
     
 def num_missing(x):
   return sum(x == 0)
@@ -137,7 +137,12 @@ data = pdata[['ISO', 'MPI_National']].sort_values('MPI_National').drop_duplicate
 compute_iqr(data)
 
 # finding correlation between the Intensity of Deprivation Rural and the Continent the country is on   
-find_correlation(pdata[['MPI_Regional', 'Intensity_of_Deprivation_Rural']])
+
+#replacing continent labels with numbers
+pdata['Continent'].unique()
+num_labels = {"Continent":{'Asia':1, 'Africa':2, 'Americas':3}}
+data = pdata.replace(num_labels)
+find_correlation(data[['Continent', 'Intensity_of_Deprivation_Rural']])
 
 # finding correlation between the Intensity of Deprivation Urban and the Population of a country
 find_correlation(pdata[['Intensity_of_Deprivation_Urban', 'Year_of_survey_population']])

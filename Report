@@ -1,0 +1,7 @@
+Analysis of Performance of the ML model:
+For a model to work efficiently, the values of residual errors should be close to zero (straight line). 
+But looking at the output of our model, it is not even working well with the training data. 
+
+Model Selection:
+In this task, we had to predict the MPI from the 4 features. Since, the values of MPI are real numbers I chose Linear Regression model.
+

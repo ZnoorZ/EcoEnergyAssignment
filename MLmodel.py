@@ -4,34 +4,45 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+np.random.seed(0)
+
 #fetching data
 filename = "processed_data.csv"
 
 data = pd.read_csv(filename)
 
+#getting required columns only
 model_data =  data.loc[:,['Continent' ,'Year_of_survey_population', 'Intensity_of_Deprivation_Rural',
                    'Intensity_of_Deprivation_Urban', 'MPI_National']]
 
+#renaming the columns
 model_data.columns = ['Continent', 'Population', 'IoD_Rural', 'IoD_Urban', 'MPI' ] 
 
-#converting all features to numerical type
+#converting continent column to numerical type
 #model_data.info()
 model_data['Continent'].unique()
 num_labels = {"Continent":{'Asia':1, 'Africa':2, 'Americas':3}}
 model_data.replace(num_labels, inplace=True)
-#print(model_data['Population'])
+
+#removing duplicates
+model_data = model_data.drop_duplicates()
 model_data.info()
 
-#there are 984 entries in total
-#600 datapoints for training data
-train_set_x = model_data.loc[0:599,['Continent', 'Population', 'IoD_Rural', 'IoD_Urban']] 
+#split data into 70% and 30% for train and test sets respectively after shuffling them
+mask = np.random.rand(len(model_data)) < 0.7
+train = model_data[mask]
+test = model_data[~mask]
+print(train) 
 
-train_set_y = model_data.loc[0:599,['MPI']] 
+#spliting into predictor columns and outcome
+train_set_x = train.loc[:,['Continent', 'Population', 'IoD_Rural', 'IoD_Urban']] 
 
-#384 data points for testing data
-test_set_x = model_data.loc[600:983,['Continent', 'Population', 'IoD_Rural', 'IoD_Urban']] 
+train_set_y = train.loc[:,['MPI']] 
 
-test_set_y = model_data.loc[600:983,['MPI']] 
+#same for test set
+test_set_x = test.loc[:,['Continent', 'Population', 'IoD_Rural', 'IoD_Urban']] 
+
+test_set_y = test.loc[:,['MPI']] 
         
 #converting dataframes to matrices
 
@@ -40,7 +51,6 @@ train_set_y = train_set_y.as_matrix().astype(np.float)
 test_set_x = test_set_x.as_matrix().astype(np.float)
 test_set_y = test_set_y.as_matrix().astype(np.float)
 
-#print(test_set_x)
 
 # main flow of training
 lm = linear_model.LinearRegression()

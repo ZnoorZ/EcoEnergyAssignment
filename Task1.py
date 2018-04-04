@@ -15,9 +15,9 @@ def compute_iqr(data):
 def find_correlation(x):
     pandas.plotting.scatter_matrix(x)
     
-def find_disparities(x, a):
+def find_disparities(x, a, b):
     sd = x.groupby(a).agg(numpy.std, ddof=1)
-    print(sd)
+    print(sd.sort_values(b, ascending=False))
     
 def num_missing(x):
   return sum(x == 0)
@@ -131,7 +131,6 @@ pdata.info()
 #cleaning completed
 
 #task 1
-
 pdata.head()
 # Computing IQR
 data = pdata[['ISO', 'MPI_National']].sort_values('MPI_National').drop_duplicates()
@@ -148,7 +147,7 @@ find_correlation(pdata[['Intensity_of_Deprivation_Urban', 'Intensity_of_Deprivat
 
 #finding countries that exhibit largest subnational disparities in MPI
 data = pdata[['Country','MPI_Regional']]
-find_disparities(data, 'Country')    
+find_disparities(data, 'Country', 'MPI_Regional')    
 
 # finding countries which have high per-capita incomes still rank highly in MPI 
 data = pdata[['ISO', 'MPI_National', '2017']].drop_duplicates()
